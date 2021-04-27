@@ -17,21 +17,22 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <iostream>
-#include "include/memory.h"
+#ifndef STARDUSTEMU_MEMORY_H
+#define STARDUSTEMU_MEMORY_H
 
-int main(int argc, char *argv[]) {
+#include <vector>
 
-    // TODO: Make memory size user-selectable
-    Memory memory(8192);
+class Memory {
+public:
+    Memory(int systemSize);
 
-    if(argc == 1) {
-        std::cout << "No ROM was provided!" << std::endl;
-        return 0;
-    }
-    else {
-        memory.loadRom(argv[1], 0x100);
-    }
+    void loadRom(char *filename, int offset);
 
-    return 0;
-}
+private:
+    std::vector <unsigned char> systemRAM {};
+    std::vector <unsigned char> videoRAM {};
+    std::vector <unsigned char> cartridge {};
+};
+
+
+#endif //STARDUSTEMU_MEMORY_H

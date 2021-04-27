@@ -17,21 +17,30 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <iostream>
-#include "include/memory.h"
+#include "memory.h"
+#include <fstream>
 
-int main(int argc, char *argv[]) {
+Memory::Memory(int systemSize) {
+    // Video RAM is always 8KiB, system RAM can be extended up to 32KiB
 
-    // TODO: Make memory size user-selectable
-    Memory memory(8192);
+    // Apply sizes
+    this->systemRAM.resize(systemSize);
+    this->videoRAM.resize(8192);
 
-    if(argc == 1) {
-        std::cout << "No ROM was provided!" << std::endl;
-        return 0;
+    // Initialize every byte to 0
+    for (int i = 0; i < systemSize; ++i) {
+        this->systemRAM[i] = 0;
     }
-    else {
-        memory.loadRom(argv[1], 0x100);
-    }
 
-    return 0;
+    for (int i = 0; i < 8192; ++i) {
+        this->videoRAM[i] = 0;
+    }
+}
+
+void Memory::loadRom(char *filename, int offset) {
+    std::ifstream rom(filename, std::ios::binary);
+
+    // Resize cartridge RAM to fit the ROM, then load ROM
+    this->cartridge.resize(rom.tellg());
+    this->cartridge = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
 }
