@@ -26,7 +26,7 @@ class Memory {
 public:
     Memory(int systemSize);
 
-    void loadRom(char *filename, int offset);
+    void loadRom(char *filename);
 
 private:
     std::vector <unsigned char> systemRAM {};

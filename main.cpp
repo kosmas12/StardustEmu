@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
     else {
-        memory.loadRom(argv[1], 0x100);
+        memory.loadRom(argv[1]);
     }
 
     return 0;

@@ -37,7 +37,7 @@ Memory::Memory(int systemSize) {
     }
 }
 
-void Memory::loadRom(char *filename, int offset) {
+void Memory::loadRom(char *filename) {
     std::ifstream rom(filename, std::ios::binary);
 
     // Resize cartridge RAM to fit the ROM, then load ROM
