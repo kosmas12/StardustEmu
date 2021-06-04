@@ -21,11 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define STARDUSTEMU_MEMORY_H
 
 #include <vector>
+#include <cstdint>
 
 class Memory {
 public:
     Memory(int systemSize);
-
+    uint8_t fetchByte(uint16_t address, uint8_t memoryType = 0);
+    void writeByte(uint16_t address, uint8_t byte, uint8_t memoryType = 0);
     void loadRom(char *filename);
 
 private:

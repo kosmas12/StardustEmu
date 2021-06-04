@@ -44,3 +44,30 @@ void Memory::loadRom(char *filename) {
     this->cartridge.resize(rom.tellg());
     this->cartridge = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
 }
+
+/* Fetch a byte from memory.
+ * No memoryType - System RAM
+ * memoryType is 1 - Video RAM
+ * memoryType is 2 - Cartridge memory
+*/
+uint8_t Memory::fetchByte(uint16_t address, uint8_t memoryType) {
+    if (memoryType == 1) {
+        return this->videoRAM[address];
+    }
+    else if (memoryType == 2) {
+        return this->cartridge[address];
+    }
+    return this->systemRAM[address];
+}
+
+/* Write a byte to memory.
+ * No memoryType - System RAM
+ * memoryType is 1 - Video RAM
+*/
+void Memory::writeByte(uint16_t address, uint8_t byte, uint8_t memoryType) {
+    if (memoryType == 1) {
+        this->videoRAM[address] = byte;
+        return;
+    }
+    this->systemRAM[address] = byte;
+}

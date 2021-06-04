@@ -18,20 +18,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <iostream>
-#include "include/memory.h"
+#include "include/core/core.h"
+#include "include/memory/memory.h"
+#include "include/cpu/cpu.h"
 
 int main(int argc, char *argv[]) {
 
+    bool exitted;
+
+    if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) < 0) {
+        std::cout << "Couldn't initialize SDL: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+
+    window = SDL_CreateWindow("Stardust", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+
     // TODO: Make memory size user-selectable
     Memory memory(8192);
+    CPU cpu;
 
     if(argc == 1) {
         std::cout << "No ROM was provided!" << std::endl;
         return 0;
     }
-    else {
-        memory.loadRom(argv[1]);
+    memory.loadRom(argv[1]);
+
+    while (!exitted) {
+        cpu.update(&memory, &exitted);
     }
+
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 
     return 0;
 }
