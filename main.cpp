@@ -18,12 +18,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include <iostream>
+#include <SDL2/SDL.h>
 #include "include/core/core.h"
 #include "include/memory/memory.h"
 #include "include/cpu/cpu.h"
 
 int main(int argc, char *argv[]) {
 
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+    SDL_Event event;
+    SDL_GameController *controller;
     bool exitted;
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) < 0) {
@@ -44,7 +49,7 @@ int main(int argc, char *argv[]) {
     memory.loadRom(argv[1]);
 
     while (!exitted) {
-        cpu.update(&memory, &exitted);
+        cpu.run(&memory, &exitted, window, renderer, event, controller);
     }
 
     SDL_DestroyWindow(window);

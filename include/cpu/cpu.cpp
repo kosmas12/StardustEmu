@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "../core/core.h"
 #include <SDL2/SDL.h>
 
-// CPU constructor. Initializes in state the boot ROM leaves the CPU in
+// CPU constructor. Initializes in the state the boot ROM leaves the CPU in
 CPU::CPU() {
     this->writeAF(0x01B0);
     this->writeBC(0x0013);
@@ -49,7 +49,7 @@ void CPU::executeNextOP(Memory *memory) {
 
 }
 
-void CPU::update(Memory *memory, bool *exit) {
+void CPU::run(Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, SDL_GameController *controller) {
     const int cyclesPerFrame = 69905;
     curFrameCycleCount = 0;
     while (curFrameCycleCount < cyclesPerFrame) {
@@ -57,7 +57,7 @@ void CPU::update(Memory *memory, bool *exit) {
         /*
         this->UpdateTimers(curFrameCycleCount);
         this->UpdateGraphics(curFrameCycleCount);
-        this->DoInterupts();
+        this->DoInterrupts();
         */
         ++curFrameCycleCount;
     }
