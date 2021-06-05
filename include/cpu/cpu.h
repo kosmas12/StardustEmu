@@ -21,12 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define STARDUSTEMU_CPU_H
 
 #include <cstdint>
+#include <SDL2/SDL.h>
 #include "../memory/memory.h"
 
 class CPU {
 public:
     CPU();
-    void update(Memory *memory, bool *exit);
+    void run (Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, SDL_GameController *controller);
 
 private:
     void writeAF(uint16_t value);
