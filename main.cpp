@@ -38,14 +38,13 @@ int main(int argc, char *argv[]) {
     window = SDL_CreateWindow("Stardust", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 
     // TODO: Make memory size user-selectable
-    Memory memory(8192);
+    Memory memory(8192, argv[1]);
     CPU cpu;
 
     if(argc == 1) {
         std::cout << "No ROM was provided!" << std::endl;
         return 0;
     }
-    memory.loadRom(argv[1]);
 
     while (!exitted) {
         cpu.run(&memory, &exitted, window, renderer, event, controller);

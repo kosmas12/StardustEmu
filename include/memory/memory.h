@@ -25,15 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class Memory {
 public:
-    Memory(int systemSize);
-    uint8_t fetchByte(uint16_t address, uint8_t memoryType = 0);
-    void writeByte(uint16_t address, uint8_t byte, uint8_t memoryType = 0);
-    void loadRom(char *filename);
+    Memory(char *filename);
+    uint8_t fetchByte(uint16_t address);
+    void writeByte(uint16_t address, uint8_t byte);
 
 private:
-    std::vector <unsigned char> systemRAM {};
-    std::vector <unsigned char> videoRAM {};
-    std::vector <unsigned char> cartridge {};
+    std::vector <unsigned char> memoryBus {};
 };
 
 

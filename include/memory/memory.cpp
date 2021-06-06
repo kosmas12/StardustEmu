@@ -20,54 +20,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "memory.h"
 #include <fstream>
 
-Memory::Memory(int systemSize) {
-    // Video RAM is always 8KiB, system RAM can be extended up to 32KiB
+Memory::Memory(char *filename) {
 
-    // Apply sizes
-    this->systemRAM.resize(systemSize);
-    this->videoRAM.resize(8192);
-
-    // Initialize every byte to 0
-    for (int i = 0; i < systemSize; ++i) {
-        this->systemRAM[i] = 0;
-    }
-
-    for (int i = 0; i < 8192; ++i) {
-        this->videoRAM[i] = 0;
-    }
-}
-
-void Memory::loadRom(char *filename) {
     std::ifstream rom(filename, std::ios::binary);
 
-    // Resize cartridge RAM to fit the ROM, then load ROM
-    this->cartridge.resize(rom.tellg());
-    this->cartridge = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
+    /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65535 bytes (64KiB) */
+
+    // Apply sizes
+    this->memoryBus.resize(65535);
+
+    // Initialize every byte to 0
+    for (int i = 0; i < memoryBus.size(); ++i) {
+        this->memoryBus[i] = 0;
+    }
+
+    auto cartridge = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
+
+    // No need to init the rest of the bytes to zero, this was done before
+    int i = 0;
+    while (cartridge[i]) {
+        this->memoryBus[0x100 + i] = cartridge[i];
+        ++i;
+    }
 }
 
-/* Fetch a byte from memory.
- * No memoryType - System RAM
- * memoryType is 1 - Video RAM
- * memoryType is 2 - Cartridge memory
-*/
-uint8_t Memory::fetchByte(uint16_t address, uint8_t memoryType) {
-    if (memoryType == 1) {
-        return this->videoRAM[address];
-    }
-    else if (memoryType == 2) {
-        return this->cartridge[address];
-    }
-    return this->systemRAM[address];
+uint8_t Memory::fetchByte(uint16_t address) {
+    return this->memoryBus[address];
 }
 
-/* Write a byte to memory.
- * No memoryType - System RAM
- * memoryType is 1 - Video RAM
-*/
-void Memory::writeByte(uint16_t address, uint8_t byte, uint8_t memoryType) {
-    if (memoryType == 1) {
-        this->videoRAM[address] = byte;
-        return;
-    }
-    this->systemRAM[address] = byte;
+void Memory::writeByte(uint16_t address, uint8_t byte) {
+    this->memoryBus[address] = byte;
 }

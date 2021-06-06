@@ -31,13 +31,8 @@ CPU::CPU() {
 }
 
 void CPU::executeNextOP(Memory *memory) {
-    /* NOTE: The program counter is set to 0x100 once the boot ROM has ran, however,
-    while on an actual Game Boy the cartridge does start at 0x100 of the main system bus,
-    it's not the case with this emulator as it's not part of the main system bus and is instead its own
-    thing (like all memory), so 0x100 will be subtracted from the cartridge fetch addresses (not
-    changing the init value itself to 0 as things *might* depend on it (untested)) */
 
-    uint8_t curByte = memory->fetchByte(this->PC - 0x100, 2);
+    uint8_t curByte = memory->fetchByte(this->PC);
 
     if (curByte != 0xCB) {
         // Execute regular instruction
