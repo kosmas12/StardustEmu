@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "cpu.h"
-#include "../core/core.h"
 #include <SDL2/SDL.h>
 
 // CPU constructor. Initializes in the state the boot ROM leaves the CPU in

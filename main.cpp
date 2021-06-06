@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <iostream>
 #include <SDL2/SDL.h>
-#include "include/core/core.h"
 #include "include/memory/memory.h"
 #include "include/cpu/cpu.h"
 
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
     SDL_Renderer *renderer;
     SDL_Event event;
     SDL_GameController *controller;
-    bool exitted;
+    bool exitted = false;
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) < 0) {
         std::cout << "Couldn't initialize SDL: " << SDL_GetError() << std::endl;
