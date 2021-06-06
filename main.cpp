@@ -24,11 +24,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 int main(int argc, char *argv[]) {
 
+    if(argc == 1) {
+        std::cout << "No ROM was provided!" << std::endl;
+        return 0;
+    }
+
+    Memory memory(argv[1]);
+    CPU cpu;
+
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Event event;
     SDL_GameController *controller;
-    bool exitted = false;
+    bool exited = false;
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) < 0) {
         std::cout << "Couldn't initialize SDL: " << SDL_GetError() << std::endl;
@@ -37,17 +45,8 @@ int main(int argc, char *argv[]) {
 
     window = SDL_CreateWindow("Stardust", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 
-    // TODO: Make memory size user-selectable
-    Memory memory(8192, argv[1]);
-    CPU cpu;
-
-    if(argc == 1) {
-        std::cout << "No ROM was provided!" << std::endl;
-        return 0;
-    }
-
-    while (!exitted) {
-        cpu.run(&memory, &exitted, window, renderer, event, controller);
+    while (!exited) {
+        cpu.run(&memory, &exited, window, renderer, event, controller);
     }
 
     SDL_DestroyWindow(window);
