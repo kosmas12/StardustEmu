@@ -20,9 +20,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "memory.h"
 #include <fstream>
 
-Memory::Memory(char *filename) {
+Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
 
     std::ifstream rom(filename, std::ios::binary);
+    std::ifstream bootRom(bootRomName, std::ios::binary);
 
     /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65535 bytes (64KiB) */
 
@@ -34,12 +35,23 @@ Memory::Memory(char *filename) {
         this->memoryBus[i] = 0;
     }
 
-    auto cartridge = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
+    int i;
 
-    // No need to init the rest of the bytes to zero, this was done before
-    int i = 0;
-    while (cartridge[i]) {
-        this->memoryBus[0x100 + i] = cartridge[i];
+    if (bootRomGiven) {
+        // Boot ROM is 256 bytes
+        auto bootRomBytes = std::vector <unsigned char>(std::istreambuf_iterator<char>(bootRom), {});
+        for (i = 0; i < 256; ++i) {
+            this->memoryBus[i] = bootRomBytes[i];
+        }
+    }
+
+    // Reset byte counter to load cartridge
+    i = 0;
+
+    auto cartridgeBytes = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
+
+    while (cartridgeBytes[i]) {
+        this->memoryBus[0x100 + i] = cartridgeBytes[i];
         ++i;
     }
 }

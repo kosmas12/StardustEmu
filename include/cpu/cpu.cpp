@@ -19,23 +19,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "cpu.h"
 #include <SDL2/SDL.h>
 
-// CPU constructor. Initializes in the state the boot ROM leaves the CPU in
-CPU::CPU() {
-    this->writeAF(0x01B0);
-    this->writeBC(0x0013);
-    this->writeDE(0x00D8);
-    this->writeHL(0x014D);
-    this->SP = 0xFFFE;
-    this->PC = 0x100;
+// CPU constructor. Initializes in post-boot state, or relies on the provided boot ROM (if any)
+CPU::CPU(bool bootRomGiven) {
+    if (bootRomGiven) {
+        this->SP = 0x0;
+        this->PC = 0x0;
+    }
+    else {
+        this->writeAF(0x01B0);
+        this->writeBC(0x0013);
+        this->writeDE(0x00D8);
+        this->writeHL(0x014D);
+        this->SP = 0xFFFE;
+        this->PC = 0x100;
+    }
     this->curFrameCycleCount = 0;
 }
 
-void CPU::executeNextOP(Memory *memory) {
+void CPU::executeNext(Memory *memory) {
 
-    uint8_t curByte = memory->fetchByte(this->PC);
+    uint8_t curByte = memory->fetchByte(this->PC++);
 
     if (curByte != 0xCB) {
-        // Execute regular instruction
+        executeRegularInstruction(curByte, memory);
     }
     else {
         // Execute CB-prefixed instruction
@@ -47,13 +53,12 @@ void CPU::run(Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *rend
     const int cyclesPerFrame = 69905;
     curFrameCycleCount = 0;
     while (curFrameCycleCount < cyclesPerFrame) {
-        this->executeNextOP(memory);
+        this->executeNext(memory);
         /*
         this->UpdateTimers(curFrameCycleCount);
         this->UpdateGraphics(curFrameCycleCount);
         this->DoInterrupts();
         */
-        ++curFrameCycleCount;
     }
     // RenderScreen();
     while (SDL_PollEvent(&event)) {
@@ -63,4 +68,12 @@ void CPU::run(Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *rend
                 return;
         }
     }
+}
+
+void CPU::setFlag(uint8_t flag, bool set) {
+    this->regF = (this->regF & ~(1 << flag)) | (set << flag);
+}
+
+bool CPU::getFlag(uint8_t flag) {
+    return ((this->regF >> flag) & 1);
 }

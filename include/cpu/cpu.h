@@ -24,21 +24,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <SDL2/SDL.h>
 #include "../memory/memory.h"
 
+#define REG_AF 0
+#define REG_BC 1
+#define REG_DE 2
+#define REG_HL 3
+#define REG_SP 4
+
+#define CARRY_FLAG 4
+#define HALF_CARRY_FLAG 5
+#define SUBTRACTION_FLAG 6
+#define ZERO_FLAG 7
+
+
 class CPU {
 public:
-    CPU();
+    CPU(bool bootRomGiven);
     void run (Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, SDL_GameController *controller);
 
 private:
-    void writeAF(uint16_t value);
-    void writeBC(uint16_t value);
-    void writeDE(uint16_t value);
-    void writeHL(uint16_t value);
-    uint16_t readAF();
-    uint16_t readBC();
-    uint16_t readDE();
-    uint16_t readHL();
-    void executeNextOP(Memory *memory);
 
     uint8_t regA {};
     uint8_t regB {};
@@ -52,6 +55,22 @@ private:
     uint16_t PC;
     int curFrameCycleCount;
 
+    void writeAF(uint16_t value);
+    void writeBC(uint16_t value);
+    void writeDE(uint16_t value);
+    void writeHL(uint16_t value);
+    uint16_t readAF();
+    uint16_t readBC();
+    uint16_t readDE();
+    uint16_t readHL();
+    void executeNext(Memory *memory);
+
+    void executeRegularInstruction(uint8_t byte, Memory *memory);
+    void nop();
+    void ld16(uint16_t destination, Memory *memory);
+    void rlc(uint8_t *byte);
+    void setFlag(uint8_t flag, bool set);
+    bool getFlag(uint8_t flag);
 };
 
 #endif //STARDUSTEMU_CPU_H

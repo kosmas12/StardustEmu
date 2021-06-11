@@ -29,8 +29,15 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    Memory memory(argv[1]);
-    CPU cpu;
+    bool bootRomGiven = false;
+    std::string bootRomName = "";
+
+    if (argc > 2) {
+        bootRomGiven = true;
+        bootRomName = argv[2];
+    }
+    Memory memory(argv[1], bootRomGiven, bootRomName);
+    CPU cpu(bootRomGiven);
 
     SDL_Window *window;
     SDL_Renderer *renderer;

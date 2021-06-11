@@ -22,10 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <vector>
 #include <cstdint>
+#include <string>
 
 class Memory {
 public:
-    Memory(char *filename);
+    Memory(char *filename, bool bootRomGiven, std::string bootRomName);
     uint8_t fetchByte(uint16_t address);
     void writeByte(uint16_t address, uint8_t byte);
 
