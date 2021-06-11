@@ -41,6 +41,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
         // 0x03: INC BC (Duration: 8 t cycles)
         case 0x03:
             this->writeBC(this->readBC() + 1);
+
+            if (this->readBC() == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            this->setFlag(SUBTRACTION_FLAG, false);
+            if ((this->readBC() & 0xF) == 0xF) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+
             this->curFrameCycleCount += 8;
             break;
 
@@ -139,6 +148,19 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 12;
             break;
 
+        // 0x22: LD memory[HL], A and then increment HL (Duration: 8 t cycles)
+        case 0x22:
+            memory->writeByte(this->readHL(), this->regA);
+            this->writeHL(this->readHL() + 1);
+            this->curFrameCycleCount += 8;
+            break;
+
+        // 0x23: INC HL (Duration: 8 t cycles)
+        case 0x23:
+            this->writeHL(this->readHL() + 1);
+            this->curFrameCycleCount += 8;
+            break;
+
         // 0x31: LD SP, u16 (Duration: 12 t cycles)
         case 0x31:
             ld16(REG_SP, memory);
@@ -156,6 +178,12 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
         case 0x3E:
             this->regA = memory->fetchByte(this->PC++);
             this->curFrameCycleCount += 8;
+            break;
+
+        // 0x4F: LD C, A (Duration: 4 t cycles)
+        case 0x4F:
+            this->regC = this->regA;
+            this->curFrameCycleCount += 4;
             break;
 
         // 0x77: LD memory[HL], A (Duration: 8 t cycles)
@@ -184,6 +212,25 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 4;
             break;
 
+        // 0xC5: PUSH BC (Duration: 16 t cycles)
+        case 0xC5:
+            this->pushToStack(memory, this->readBC());
+            this->curFrameCycleCount += 16;
+            break;
+
+        // 0xC9: RET (Duration: 16 t cycles)
+        case 0xC9:
+            this->PC = popFromStack(memory);
+            this->curFrameCycleCount += 16;
+            break;
+
+        // 0xCD: CALL u16 (Duration: 24 t cycles)
+        case 0xCD:
+            this->pushToStack(memory, this->PC + 2);
+            this->ld16(REG_PC, memory);
+            this->curFrameCycleCount += 24;
+            break;
+
         // 0xE0: LD (FF00 + u8), A (Duration: 12 t cycles)
         case 0xE0:
             memory->writeByte((0xFF00 + memory->fetchByte(this->PC++)), this->regA);
@@ -200,4 +247,5 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             exit(2);
             break;
     }
+
 }

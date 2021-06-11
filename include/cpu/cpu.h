@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define REG_DE 2
 #define REG_HL 3
 #define REG_SP 4
+#define REG_PC 5
 
 #define CARRY_FLAG 4
 #define HALF_CARRY_FLAG 5
@@ -70,6 +71,9 @@ private:
     void rlc(uint8_t *byte);
     void setFlag(uint8_t flag, bool set);
     bool getFlag(uint8_t flag);
+    void pushToStack(Memory *memory, uint16_t value);
+
+    uint16_t popFromStack(Memory *memory);
 };
 
 #endif //STARDUSTEMU_CPU_H

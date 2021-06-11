@@ -21,12 +21,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 void CPU::ld16(uint16_t destination, Memory *memory) {
 
-    uint8_t byte1, byte2;
+    uint8_t lowByte, highByte;
 
-    byte1 = memory->fetchByte(this->PC++);
-    byte2 = memory->fetchByte(this->PC++);
+    lowByte = memory->fetchByte(this->PC++);
+    highByte = memory->fetchByte(this->PC++);
 
-    uint16_t value = (byte1 << 8) | byte2;
+    uint16_t value = (highByte << 8) | lowByte;
 
     switch (destination) {
         case REG_AF:
@@ -43,13 +43,17 @@ void CPU::ld16(uint16_t destination, Memory *memory) {
             break;
         case REG_SP:
             this->SP = value;
+            break;
+        case REG_PC:
+            this->PC = value;
+            break;
         default:
             break;
     }
 }
 
 void CPU::rlc(uint8_t *byte) {
-    bool temp = (*byte & 0x80) >> 7;
-    this->setFlag(CARRY_FLAG, temp);
-    *byte = (*byte << 1) | temp;
+    bool carry = (*byte & 0x80) >> 7;
+    this->setFlag(CARRY_FLAG, carry);
+    *byte = (*byte << 1) | carry;
 }

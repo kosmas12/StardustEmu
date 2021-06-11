@@ -77,3 +77,26 @@ void CPU::setFlag(uint8_t flag, bool set) {
 bool CPU::getFlag(uint8_t flag) {
     return ((this->regF >> flag) & 1);
 }
+
+void CPU::pushToStack(Memory *memory, uint16_t value) {
+
+    uint8_t highByte, lowByte;
+
+    lowByte = value & 0xFF;
+    highByte = value << 8;
+
+    this->SP--;
+    memory->writeByte(this->SP--, highByte);
+    memory->writeByte(this->SP, lowByte);
+}
+
+uint16_t CPU::popFromStack(Memory *memory) {
+    uint8_t lowByte, highByte;
+
+    highByte = memory->fetchByte(this->SP++);
+    lowByte = memory->fetchByte(this->SP++);
+
+    uint16_t value = (lowByte << 8) | highByte;
+
+    return value;
+}
