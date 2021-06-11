@@ -66,7 +66,6 @@ private:
     void executeNext(Memory *memory);
 
     void executeRegularInstruction(uint8_t byte, Memory *memory);
-    void nop();
     void ld16(uint16_t destination, Memory *memory);
     void rlc(uint8_t *byte);
     void setFlag(uint8_t flag, bool set);

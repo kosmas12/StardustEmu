@@ -19,10 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "cpu.h"
 
-void CPU::nop() {
-    return;
-}
-
 void CPU::ld16(uint16_t destination, Memory *memory) {
 
     uint8_t byte1, byte2;

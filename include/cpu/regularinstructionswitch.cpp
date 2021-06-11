@@ -23,7 +23,6 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
     switch (byte) {
         // 0x00: NOP (Duration: 4 t cycles)
         case 0x00:
-            this->nop();
             this->curFrameCycleCount += 4;
             break;
 
