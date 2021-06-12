@@ -28,7 +28,7 @@ Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
     /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65535 bytes (64KiB) */
 
     // Apply sizes
-    this->memoryBus.resize(65535);
+    this->memoryBus.resize(65536);
 
     // Initialize every byte to 0
     for (int i = 0; i < memoryBus.size(); ++i) {
