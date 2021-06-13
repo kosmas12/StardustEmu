@@ -45,22 +45,26 @@ void CPU::executeNext(Memory *memory) {
     }
     else {
         // Execute CB-prefixed instruction
+        executeCBPrefixedInstruction(memory);
     }
 
 }
 
-void CPU::run(Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, SDL_GameController *controller) {
+void CPU::run(Memory *memory, bool *exit, PPU *ppu, SDL_Event event, SDL_GameController *controller) {
     const int cyclesPerFrame = 69905;
     curFrameCycleCount = 0;
     while (curFrameCycleCount < cyclesPerFrame) {
         this->executeNext(memory);
-        /*
-        this->UpdateTimers(curFrameCycleCount);
-        this->UpdateGraphics(curFrameCycleCount);
-        this->DoInterrupts();
-        */
+        if (this->PC == 0xA0) {
+            continue;
+        }
+        //this->updateTimers(curFrameCycleCount);
+        ppu->renderGraphics(curFrameCycleCount, memory);
+        //this->handleInterrupts();
+
     }
-    // RenderScreen();
+    printf("Frame done with PC at 0x%02X\n", this->PC);
+    // ppu->updateScreen();
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
@@ -70,12 +74,25 @@ void CPU::run(Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *rend
     }
 }
 
+void CPU::setBit(uint8_t *value, uint8_t bitToSet, bool set) {
+    if (set) {
+        *value |= 1UL << bitToSet;
+    }
+    else {
+        *value &= ~(1UL << bitToSet);
+    }
+}
+
+bool CPU::getBit(uint8_t value, uint8_t bitToGet) {
+    return (value >> bitToGet) & 1U;
+}
+
 void CPU::setFlag(uint8_t flag, bool set) {
-    this->regF = (this->regF & ~(1 << flag)) | (set << flag);
+    this->setBit(&this->regF, flag, set);
 }
 
 bool CPU::getFlag(uint8_t flag) {
-    return ((this->regF >> flag) & 1);
+    return this->getBit(this->regF, flag);
 }
 
 void CPU::pushToStack(Memory *memory, uint16_t value) {

@@ -52,8 +52,32 @@ void CPU::ld16(uint16_t destination, Memory *memory) {
     }
 }
 
+void CPU::rl(uint8_t *byte) {
+    bool prevCarry = this->getFlag(CARRY_FLAG);
+    bool carry = (*byte & 0x80) >> 7;
+    this->setFlag(CARRY_FLAG, carry);
+    *byte = (*byte << 1) | prevCarry;
+}
+
 void CPU::rlc(uint8_t *byte) {
     bool carry = (*byte & 0x80) >> 7;
     this->setFlag(CARRY_FLAG, carry);
     *byte = (*byte << 1) | carry;
+}
+
+void CPU::cp(uint8_t operand1, uint8_t operand2) {
+    if (operand1 == operand2) {
+        this->setFlag(ZERO_FLAG, true);
+    }
+
+    this->setFlag(SUBTRACTION_FLAG, true);
+
+    if ((operand1 & 0xF) < (operand2 & 0xF)) {
+        this->setFlag(HALF_CARRY_FLAG, true);
+    }
+
+    if (operand1 < operand2) {
+        this->setFlag(CARRY_FLAG, true);
+    }
+
 }

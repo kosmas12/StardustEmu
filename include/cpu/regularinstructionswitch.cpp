@@ -45,9 +45,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             if (this->readBC() == 0) {
                 this->setFlag(ZERO_FLAG, true);
             }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
             this->setFlag(SUBTRACTION_FLAG, false);
             if ((this->readBC() & 0xF) == 0xF) {
                 this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
             }
 
             this->curFrameCycleCount += 8;
@@ -60,9 +66,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             if (this->regB == 0) {
                 this->setFlag(ZERO_FLAG, true);
             }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
             this->setFlag(SUBTRACTION_FLAG, false);
             if ((this->regB & 0xF) == 0xF) {
                 this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
             }
 
             this->curFrameCycleCount += 4;
@@ -75,9 +87,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             if (this->regB == 0) {
                 this->setFlag(ZERO_FLAG, true);
             }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
             this->setFlag(SUBTRACTION_FLAG, true);
             if ((this->regB & 0xF) == 0x0) {
                 this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
             }
 
             this->curFrameCycleCount += 4;
@@ -102,9 +120,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             if (this->regC == 0) {
                 this->setFlag(ZERO_FLAG, true);
             }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
             this->setFlag(SUBTRACTION_FLAG, false);
             if ((this->regC & 0xF) == 0xF) {
                 this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
             }
 
             this->curFrameCycleCount += 4;
@@ -122,6 +146,34 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 12;
             break;
 
+        // 0x13: INC DE (Duration: 8 t cycles)
+        case 0x13:
+            this->writeDE(this->readDE() + 1);
+
+            if (this->readDE() == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
+            this->setFlag(SUBTRACTION_FLAG, false);
+            if ((this->readDE() & 0xF) == 0xF) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
+            }
+
+
+            this->curFrameCycleCount += 8;
+            break;
+
+        // 0x17: RL A (Duration: 8 t cycles)
+        case 0x17:
+            this->rl(&this->regA);
+            this->curFrameCycleCount += 8;
+            break;
+
         // 0x1A: LD A, (DE) (Duration: 8 t cycles)
         case 0x1A:
             this->regA = memory->fetchByte(this->readDE());
@@ -130,14 +182,14 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
 
         // 0x20: JR NZ, i8 (Duration: 12 t cycles if jump, 8 if not)
         case 0x20:
-            // Need to move 1 more byte either way
-            this->PC++;
-
             if (!this->getFlag(ZERO_FLAG)) {
-                this->PC = memory->fetchByte(this->PC);
+                tempByte1 = memory->fetchByte(this->PC);
+                this->PC++;
+                this->PC += (int8_t) tempByte1;
                 this->curFrameCycleCount += 12;
             }
             else {
+                this->PC++;
                 this->curFrameCycleCount += 8;
             }
             break;
@@ -161,6 +213,18 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 8;
             break;
 
+        // 0x28: JR Z, i8 (Duration: 12 t cycles if jump, 8 if not)
+        case 0x28:
+            if (this->getFlag(ZERO_FLAG)) {
+                this->PC = memory->fetchByte(this->PC);
+                this->curFrameCycleCount += 12;
+            }
+            else {
+                this->PC++;
+                this->curFrameCycleCount += 8;
+            }
+            break;
+
         // 0x31: LD SP, u16 (Duration: 12 t cycles)
         case 0x31:
             ld16(REG_SP, memory);
@@ -172,6 +236,27 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             memory->writeByte(this->readHL(), this->regA);
             this->writeHL(this->readHL() - 1);
             curFrameCycleCount += 8;
+            break;
+
+        // 0x3D: DEC A (Duration: 4 t cycles)
+        case 0x3D:
+            this->regA--;
+
+            if (this->regA == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
+            this->setFlag(SUBTRACTION_FLAG, true);
+            if ((this->regA & 0xF) == 0x0) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
+            }
+
+            this->curFrameCycleCount += 4;
             break;
 
         // 0x0E: LD Α, u8 (Duration: 8 t cycles)
@@ -192,6 +277,12 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 8;
             break;
 
+        // 0x7B: LD A, E (Duration: 4 t cycles)
+        case 0x7B:
+            this->regA = this->regE;
+            this->curFrameCycleCount += 4;
+            break;
+
         // 0x7C: LD A, H (Duration: 4 t cycles)
         case 0x7C:
             this->regA = this->regH;
@@ -210,6 +301,11 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->setFlag(CARRY_FLAG, false);
 
             this->curFrameCycleCount += 4;
+            break;
+
+        // 0xC1: POP BC (Duration: 12 t cycles)
+        case 0xC1:
+            this->writeBC(this->popFromStack(memory));
             break;
 
         // 0xC5: PUSH BC (Duration: 16 t cycles)
@@ -241,6 +337,20 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
         case 0xE2:
             memory->writeByte((0xFF00 + this->regC), this->regA);
             this->curFrameCycleCount += 8;
+            break;
+
+        // 0xEA: LD memory[u16], A (Duration: 16 t cycles)
+        case 0xEA:
+            this->tempByte1 = memory->fetchByte(this->PC++);
+            this->tempByte2 = memory->fetchByte(this->PC++);
+            this->tempWord = (tempByte2 << 8) | tempByte1;
+            memory->writeByte(tempWord, this->regA);
+            break;
+
+        // 0xFE: CP A, u8 (Duration: 4 t cycles)
+        case 0xFE:
+            this->cp(this->regA, memory->fetchByte(this->PC++));
+            this->curFrameCycleCount += 4;
             break;
         default:
             printf("Unimplemented opcode 0x%02X at PC 0x%02X", byte, --this->PC);

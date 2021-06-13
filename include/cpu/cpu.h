@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdint>
 #include <SDL2/SDL.h>
 #include "../memory/memory.h"
+#include "../ppu/ppu.h"
 
 #define REG_AF 0
 #define REG_BC 1
@@ -40,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class CPU {
 public:
     CPU(bool bootRomGiven);
-    void run (Memory *memory, bool *exit, SDL_Window *window, SDL_Renderer *renderer, SDL_Event event, SDL_GameController *controller);
+    void run(Memory *memory, bool *exit, PPU *ppu, SDL_Event event, SDL_GameController *controller);
 
 private:
 
@@ -55,6 +56,10 @@ private:
     uint16_t SP;
     uint16_t PC;
     int curFrameCycleCount;
+
+    uint8_t tempByte1;
+    uint8_t tempByte2;
+    uint16_t tempWord;
 
     void writeAF(uint16_t value);
     void writeBC(uint16_t value);
@@ -72,8 +77,12 @@ private:
     void setFlag(uint8_t flag, bool set);
     bool getFlag(uint8_t flag);
     void pushToStack(Memory *memory, uint16_t value);
-
     uint16_t popFromStack(Memory *memory);
+    void executeCBPrefixedInstruction(Memory *memory);
+    bool getBit(uint8_t value, uint8_t bitToGet);
+    void setBit(uint8_t *value, uint8_t bitToSet, bool set);
+    void rl(uint8_t *byte);
+    void cp(uint8_t operand1, uint8_t operand2);
 };
 
 #endif //STARDUSTEMU_CPU_H

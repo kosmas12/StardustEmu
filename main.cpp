@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <SDL2/SDL.h>
 #include "include/memory/memory.h"
 #include "include/cpu/cpu.h"
+#include "include/ppu/ppu.h"
 
 int main(int argc, char *argv[]) {
 
@@ -40,7 +41,6 @@ int main(int argc, char *argv[]) {
     CPU cpu(bootRomGiven);
 
     SDL_Window *window;
-    SDL_Renderer *renderer;
     SDL_Event event;
     SDL_GameController *controller;
     bool exited = false;
@@ -52,8 +52,10 @@ int main(int argc, char *argv[]) {
 
     window = SDL_CreateWindow("Stardust", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 
+    PPU ppu(window);
+
     while (!exited) {
-        cpu.run(&memory, &exited, window, renderer, event, controller);
+        cpu.run(&memory, &exited, &ppu, event, controller);
     }
 
     SDL_DestroyWindow(window);

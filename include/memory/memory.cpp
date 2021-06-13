@@ -25,7 +25,7 @@ Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
     std::ifstream rom(filename, std::ios::binary);
     std::ifstream bootRom(bootRomName, std::ios::binary);
 
-    /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65535 bytes (64KiB) */
+    /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65536 bytes (64KiB) */
 
     // Apply sizes
     this->memoryBus.resize(65536);
@@ -57,6 +57,9 @@ Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
 }
 
 uint8_t Memory::fetchByte(uint16_t address) {
+    if (address == 0xFF44) {
+        return 0x90;
+    }
     return this->memoryBus[address];
 }
 
