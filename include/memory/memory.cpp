@@ -20,15 +20,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "memory.h"
 #include <fstream>
 
-Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
+Memory::Memory(char *filename, bool bootRom, std::string bootRomName) {
 
     std::ifstream rom(filename, std::ios::binary);
-    std::ifstream bootRom(bootRomName, std::ios::binary);
+    std::ifstream bootCode(bootRomName, std::ios::binary);
 
     /* The Game Boy supports addresses from 0x0000 to 0xFFFF so 65536 bytes (64KiB) */
 
     // Apply sizes
     this->memoryBus.resize(65536);
+    this->cartridge.resize(32768);
 
     // Initialize every byte to 0
     for (int i = 0; i < memoryBus.size(); ++i) {
@@ -37,11 +38,12 @@ Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
 
     int i;
 
-    if (bootRomGiven) {
+    if (bootRom) {
+        this->bootRomGiven = true;
         // Boot ROM is 256 bytes
-        auto bootRomBytes = std::vector <unsigned char>(std::istreambuf_iterator<char>(bootRom), {});
+        auto bootCodeBytes = std::vector <unsigned char>(std::istreambuf_iterator<char>(bootCode), {});
         for (i = 0; i < 256; ++i) {
-            this->memoryBus[i] = bootRomBytes[i];
+            this->memoryBus[i] = bootCodeBytes[i];
         }
     }
 
@@ -50,8 +52,13 @@ Memory::Memory(char *filename, bool bootRomGiven, std::string bootRomName) {
 
     auto cartridgeBytes = std::vector <unsigned char>(std::istreambuf_iterator<char>(rom), {});
 
-    while (cartridgeBytes[i]) {
-        this->memoryBus[0x100 + i] = cartridgeBytes[i];
+    while (i < 32 * 1024) {
+        if (cartridgeBytes[i]) {
+            this->cartridge[i] = cartridgeBytes[i];
+        }
+        else {
+            this->memoryBus[0x100 + i] = 0;
+        }
         ++i;
     }
 }
@@ -60,6 +67,15 @@ uint8_t Memory::fetchByte(uint16_t address) {
     if (address == 0xFF44) {
         return 0x90;
     }
+
+    if (address < 0x100) {
+        return memoryBus[address];
+    }
+
+    if (address < 0x4000) {
+        return cartridge[address];
+    }
+
     return this->memoryBus[address];
 }
 

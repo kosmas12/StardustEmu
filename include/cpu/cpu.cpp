@@ -63,7 +63,6 @@ void CPU::run(Memory *memory, bool *exit, PPU *ppu, SDL_Event event, SDL_GameCon
         //this->handleInterrupts();
 
     }
-    printf("Frame done with PC at 0x%02X\n", this->PC);
     // ppu->updateScreen();
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -100,7 +99,7 @@ void CPU::pushToStack(Memory *memory, uint16_t value) {
     uint8_t highByte, lowByte;
 
     lowByte = value & 0xFF;
-    highByte = value << 8;
+    highByte = value >> 8;
 
     this->SP--;
     memory->writeByte(this->SP--, highByte);
@@ -110,10 +109,10 @@ void CPU::pushToStack(Memory *memory, uint16_t value) {
 uint16_t CPU::popFromStack(Memory *memory) {
     uint8_t lowByte, highByte;
 
-    highByte = memory->fetchByte(this->SP++);
     lowByte = memory->fetchByte(this->SP++);
+    highByte = memory->fetchByte(this->SP++);
 
-    uint16_t value = (lowByte << 8) | highByte;
+    uint16_t value = (highByte << 8) | lowByte;
 
     return value;
 }

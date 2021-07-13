@@ -79,5 +79,16 @@ void CPU::cp(uint8_t operand1, uint8_t operand2) {
     if (operand1 < operand2) {
         this->setFlag(CARRY_FLAG, true);
     }
+}
+
+void CPU::sub (uint8_t *operand1, uint8_t operand2) {
+    *operand1 -= operand2;
+
+    /*
+     * We can use CP to set flags for subtraction because
+     * effectively they are the same except CP doesn't keep
+     * the result
+    */
+    this->cp(*operand1, operand2);
 
 }

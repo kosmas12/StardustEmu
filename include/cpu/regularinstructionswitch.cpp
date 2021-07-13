@@ -34,7 +34,7 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
 
         // 0x02: LD memory[BC], A (Duration: 8 t cycles)
         case 0x02:
-            memory->writeByte(readBC(), this->regA);
+            memory->writeByte(this->readBC(), this->regA);
             this->curFrameCycleCount += 8;
             break;
 
@@ -134,6 +134,27 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 4;
             break;
 
+        // 0x0D: DEC C (Duration: 4 t cycles)
+        case 0x0D:
+            this->regC--;
+
+            if (this->regC == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
+            this->setFlag(SUBTRACTION_FLAG, true);
+            if ((this->regC & 0xF) == 0x0) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
+            }
+
+            this->curFrameCycleCount += 4;
+            break;
+
         // 0x0E: LD C, u8 (Duration: 8 t cycles)
         case 0x0E:
             this->regC = memory->fetchByte(this->PC++);
@@ -168,10 +189,43 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 8;
             break;
 
+        // 0x15: DEC D (Duration: 4 t cycles)
+        case 0x15:
+            this->regD--;
+
+            if (this->regD == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
+            this->setFlag(SUBTRACTION_FLAG, true);
+            if ((this->regD & 0xF) == 0x0) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
+            }
+
+            this->curFrameCycleCount += 4;
+            break;
+
+        // 0x16: LD D, u8 (Duration: 8 t cycles)
+        case 0x16:
+            this->regD = memory->fetchByte(this->PC++);
+            this->curFrameCycleCount += 8;
+            break;
+
         // 0x17: RL A (Duration: 8 t cycles)
         case 0x17:
             this->rl(&this->regA);
             this->curFrameCycleCount += 8;
+            break;
+
+        // 0x18: JR u8 (Duration: 12 t cycles)
+        case 0x18:
+            this->PC += (int8_t) memory->fetchByte(this->PC++);
+            this->curFrameCycleCount += 12;
             break;
 
         // 0x1A: LD A, (DE) (Duration: 8 t cycles)
@@ -180,16 +234,26 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 8;
             break;
 
+        // 0x1D: DEC E (Duration: 4 t cycles)
+        case 0x1D:
+            this->regE--;
+            this->curFrameCycleCount += 4;
+            break;
+
+        // 0x1E: LD E, u8 (Duration: 8 t cycles)
+        case 0x1E:
+            this->regE = memory->fetchByte(this->PC++);
+            this->curFrameCycleCount += 8;
+            break;
+
         // 0x20: JR NZ, i8 (Duration: 12 t cycles if jump, 8 if not)
         case 0x20:
+            this->tempByte1 = memory->fetchByte(this->PC++);
             if (!this->getFlag(ZERO_FLAG)) {
-                tempByte1 = memory->fetchByte(this->PC);
-                this->PC++;
-                this->PC += (int8_t) tempByte1;
+                this->PC += (int8_t) this->tempByte1;
                 this->curFrameCycleCount += 12;
             }
             else {
-                this->PC++;
                 this->curFrameCycleCount += 8;
             }
             break;
@@ -213,16 +277,44 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 8;
             break;
 
+        // INC H (Duration: 4 t cycles)
+        case 0x24:
+            this->regH++;
+
+            if (this->regH == 0) {
+                this->setFlag(ZERO_FLAG, true);
+            }
+            else {
+                this->setFlag(ZERO_FLAG, false);
+            }
+            this->setFlag(SUBTRACTION_FLAG, false);
+            if ((this->regH & 0xF) == 0xF) {
+                this->setFlag(HALF_CARRY_FLAG, true);
+            }
+            else {
+                this->setFlag(HALF_CARRY_FLAG, false);
+            }
+
+            this->curFrameCycleCount += 4;
+            break;
+            break;
+
         // 0x28: JR Z, i8 (Duration: 12 t cycles if jump, 8 if not)
         case 0x28:
+            tempByte1 = memory->fetchByte(this->PC++);
             if (this->getFlag(ZERO_FLAG)) {
-                this->PC = memory->fetchByte(this->PC);
+                this->PC += (int8_t) tempByte1;
                 this->curFrameCycleCount += 12;
             }
             else {
-                this->PC++;
                 this->curFrameCycleCount += 8;
             }
+            break;
+
+        // 0x2E: LD L, u8 (Duration: 8 t cycles)
+        case 0x2E:
+            this->regL = memory->fetchByte(this->PC++);
+            this->curFrameCycleCount += 8;
             break;
 
         // 0x31: LD SP, u16 (Duration: 12 t cycles)
@@ -271,10 +363,28 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 4;
             break;
 
+        // 0x57: LD D, A (Duration: 4 t cycles)
+        case 0x57:
+            this->regD = this->regA;
+            this->curFrameCycleCount += 4;
+            break;
+
+        // 0x67: LD H, A (Duration: 8 t cycles)
+        case 0x67:
+            this->regH = this->regA;
+            this->curFrameCycleCount += 4;
+            break;
+
         // 0x77: LD memory[HL], A (Duration: 8 t cycles)
         case 0x77:
             memory->writeByte(this->readHL(), this->regA);
             this->curFrameCycleCount += 8;
+            break;
+
+        // 0x78: LD A, B (Duration: 4 t cycles)
+        case 0x78:
+            this->regA = this->regB;
+            this->curFrameCycleCount += 4;
             break;
 
         // 0x7B: LD A, E (Duration: 4 t cycles)
@@ -287,6 +397,24 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
         case 0x7C:
             this->regA = this->regH;
             curFrameCycleCount += 4;
+            break;
+
+        // 0x7D: LD A, L (Duration: 4 t cycles)
+        case 0x7D:
+            this->regA = this->regL;
+            curFrameCycleCount += 4;
+            break;
+
+        // 0x86: ADD A, memory[HL] (Duration: 8 t cycles)
+        case 0x86:
+            this->regA += memory->fetchByte(this->readHL());
+            this->curFrameCycleCount += 8;
+            break;
+
+        // 0x90: SUB A, B (Duration: 4 t cycles)
+        case 0x90:
+            this->sub(&this->regA, this->regB);
+            this->curFrameCycleCount += 4;
             break;
 
         // 0xAF: XOR A, A (Duration: 4 t cycles)
@@ -303,9 +431,15 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->curFrameCycleCount += 4;
             break;
 
+        // 0xBE: CP A, (HL) (Duration: 8 t cycles)
+        case 0xBE:
+            this->cp(this->regA, memory->fetchByte(this->readHL()));
+            this->curFrameCycleCount += 8;
+            break;
+
         // 0xC1: POP BC (Duration: 12 t cycles)
         case 0xC1:
-            this->writeBC(this->popFromStack(memory));
+           this->writeBC(this->popFromStack(memory));
             break;
 
         // 0xC5: PUSH BC (Duration: 16 t cycles)
@@ -345,6 +479,13 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
             this->tempByte2 = memory->fetchByte(this->PC++);
             this->tempWord = (tempByte2 << 8) | tempByte1;
             memory->writeByte(tempWord, this->regA);
+            break;
+
+        // 0xF0: LD A, memory[FF00 + u8] (Duration: 12 t cycles)
+        case 0xF0:
+            this->tempWord = 0xFF00 + memory->fetchByte(this->PC++);
+            this->regA = memory->fetchByte(tempWord);
+            this->curFrameCycleCount += 12;
             break;
 
         // 0xFE: CP A, u8 (Duration: 4 t cycles)

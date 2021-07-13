@@ -83,6 +83,7 @@ private:
     void setBit(uint8_t *value, uint8_t bitToSet, bool set);
     void rl(uint8_t *byte);
     void cp(uint8_t operand1, uint8_t operand2);
+    void sub(uint8_t *operand1, uint8_t operand2);
 };
 
 #endif //STARDUSTEMU_CPU_H
