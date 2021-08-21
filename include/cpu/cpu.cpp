@@ -44,7 +44,6 @@ void CPU::executeNext(Memory *memory) {
         executeRegularInstruction(curByte, memory);
     }
     else {
-        // Execute CB-prefixed instruction
         executeCBPrefixedInstruction(memory);
     }
 
@@ -63,7 +62,7 @@ void CPU::run(Memory *memory, bool *exit, PPU *ppu, SDL_Event event, SDL_GameCon
         //this->handleInterrupts();
 
     }
-    // ppu->updateScreen();
+    ppu->updateScreen();
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:

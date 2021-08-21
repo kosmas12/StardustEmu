@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     }
 
     bool bootRomGiven = false;
-    std::string bootRomName = "";
+    std::string bootRomName;
 
     if (argc > 2) {
         bootRomGiven = true;

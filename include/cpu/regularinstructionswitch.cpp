@@ -439,7 +439,14 @@ void CPU::executeRegularInstruction(uint8_t byte, Memory *memory) {
 
         // 0xC1: POP BC (Duration: 12 t cycles)
         case 0xC1:
-           this->writeBC(this->popFromStack(memory));
+            this->writeBC(this->popFromStack(memory));
+            this->curFrameCycleCount += 12;
+            break;
+
+        // 0xC3: JP u16 (Duration: 16 t cycles)
+        case 0xC3:
+            this->ld16(REG_PC, memory);
+            this->curFrameCycleCount += 16;
             break;
 
         // 0xC5: PUSH BC (Duration: 16 t cycles)
