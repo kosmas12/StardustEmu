@@ -12,4 +12,4 @@ make
 
 A Game Boy boot ROM is not required, but it is planned to be able to provide it if you want to. Launch the emulator like so:
 
-```./StardustEmu path/to/rom.gb```
+```./StardustEmu path/to/rom.gb path/to/optional/bootrom.gb```
