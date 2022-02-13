@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     SDL_Window *window;
     SDL_Event event;
-    SDL_GameController *controller;
+    SDL_GameController *controller = nullptr;
     bool exited = false;
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_GAMECONTROLLER) < 0) {

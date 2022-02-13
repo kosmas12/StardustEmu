@@ -8,7 +8,7 @@
 
 PPU::PPU(SDL_Window *window) {
     this->window = window;
-    this->windowSurface = SDL_GetWindowSurface(this->window);
+    this->SDLWindowSurface = SDL_GetWindowSurface(this->window);
 
     uint32_t RMask, GMask, BMask, AMask;
 
@@ -29,22 +29,33 @@ PPU::PPU(SDL_Window *window) {
     this->colors[1] = {0x30, 0x62, 0x30, 0xFF};
     this->colors[2] = {0x8B, 0xAC, 0x0F, 0xFF};
     this->colors[3] = {0x9B, 0xBC, 0x0F, 0xFF};
-    this->screenSurface = SDL_CreateRGBSurface(0, 160, 144, 32, RMask, GMask, BMask, AMask);
-    if (!screenSurface) {
+    this->PPUBackgroundSurface = SDL_CreateRGBSurface(0, 160, 144, 32, RMask, GMask, BMask, AMask);
+    if (!this->PPUBackgroundSurface) {
         std::cout << "Couldn't create screen surface! Reason: " << SDL_GetError() << std::endl;
+        exit(10);
+    }
+    this->PPUWindowSurface = SDL_CreateRGBSurface(0, 160, 144, 32, RMask, GMask, BMask, AMask);
+    if (!this->PPUWindowSurface) {
+        std::cout << "Couldn't create PPU window surface! Reason: " << SDL_GetError() << std::endl;
+        exit(11);
+    }
+    this->PPUSpritesSurface = SDL_CreateRGBSurface(0, 160, 144, 32, RMask, GMask, BMask, AMask);
+    if (!this->PPUSpritesSurface) {
+        std::cout << "Couldn't create sprites surface! Reason: " << SDL_GetError() << std::endl;
+        exit(12);
     }
     clearScreen();
 }
 
 void PPU::clearScreen() {
     SDL_Color colorToUse = this->colors[3];
-    SDL_FillRect(this->screenSurface, nullptr, SDL_MapRGB(this->screenSurface->format, colorToUse.r, colorToUse.g, colorToUse.b));
-    SDL_BlitScaled(this->screenSurface, nullptr, this->windowSurface, nullptr);
+    SDL_FillRect(this->SDLWindowSurface, nullptr,
+                 SDL_MapRGB(this->SDLWindowSurface->format, colorToUse.r, colorToUse.g, colorToUse.b));
     SDL_UpdateWindowSurface(window);
 }
 
 void PPU::updateScreen() {
-    SDL_BlitScaled(this->screenSurface, nullptr, this->windowSurface, nullptr);
+    SDL_BlitScaled(this->PPUBackgroundSurface, nullptr, this->SDLWindowSurface, nullptr);
     SDL_UpdateWindowSurface(this->window);
 }
 
@@ -67,17 +78,26 @@ SDL_Color PPU::makeColor(const uint8_t byte1, const uint8_t byte2, int bit) {
     return this->colors[color];
 }
 
-void PPU::renderGraphics(int cycles, Memory *memory) {
+void PPU::renderGraphics(int currentCycleCount, Memory *memory) {
     const int cyclesPerFrame = 69905;
     static int lastCycleCount;
     int cyclesToRun;
 
-    if (cycles < lastCycleCount) {
-        cyclesToRun = cyclesPerFrame - lastCycleCount + cycles;
+    // Cycles are reset each 69905 increments, so no need to worry about going higher than cyclesPerFrame.
+    if (lastCycleCount < currentCycleCount) {
+        cyclesToRun = currentCycleCount - lastCycleCount;
     }
     else {
-        cyclesToRun = cycles - lastCycleCount;
+        // Finish last frame and run cycles from new frame
+        cyclesToRun = (cyclesPerFrame - lastCycleCount) + currentCycleCount;
     }
-    lastCycleCount = cycles;
 
+    lastCycleCount = currentCycleCount;
+
+}
+
+PPU::~PPU() {
+    SDL_FreeSurface(this->PPUBackgroundSurface);
+    SDL_FreeSurface(this->PPUWindowSurface);
+    SDL_FreeSurface(this->PPUSpritesSurface);
 }
